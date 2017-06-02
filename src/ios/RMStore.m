@@ -239,7 +239,7 @@ typedef void (^RMStoreSuccessBlock)();
     delegate.failureBlock = failureBlock;
     [_productsRequestDelegates addObject:delegate];
  
-    SKProductsRequest *productsRequest = [[SKProductsRequest alloc] initWithProductIdentifiers:identifiers];
+    SKProductsRequest * productsRequest = [[SKProductsRequest alloc] initWithProductIdentifiers:identifiers];
 	productsRequest.delegate = delegate;
     
     [productsRequest start];
@@ -746,6 +746,9 @@ typedef void (^RMStoreSuccessBlock)();
 - (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response
 {
     RMStoreLog(@"products request received response");
+    
+    request.delegate = nil;
+    
     NSArray *products = [NSArray arrayWithArray:response.products];
     NSArray *invalidProductIdentifiers = [NSArray arrayWithArray:response.invalidProductIdentifiers];
     
@@ -770,11 +773,14 @@ typedef void (^RMStoreSuccessBlock)();
 - (void)requestDidFinish:(SKRequest *)request
 {
     [self.store removeProductsRequestDelegate:self];
+    request.delegate = nil;
 }
 
 - (void)request:(SKRequest *)request didFailWithError:(NSError *)error
 {
     RMStoreLog(@"products request failed with error %@", error.debugDescription);
+    request.delegate = nil;
+    
     if (self.failureBlock)
     {
         self.failureBlock(error);
